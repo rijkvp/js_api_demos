@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="default.css">
+    <title>Kleur namen</title>
+</head>
+
+<body>
+    <script>
+        function getColorName() {
+            var hexInput = document.getElementById("color-input").value;
+            // Verwijder de # uit de invoer als die er is. De API ondersteunt namelijk geen # in de invoer.
+            if (hexInput.charAt(0) == "#") {
+                hexInput = hexInput.substring(1);
+            }
+            fetch(`https://api.color.pizza/v1/${hexInput}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw Error(`De API gaf een foutmelding! status: ${response.status}`);
+                    }
+                })
+                .then(json => {
+                    var result = document.getElementById("result");
+                    result.innerHTML = '';
+                    for (color of json.colors) {
+                        console.log(color);
+                        var row = document.createElement("div");
+                        row.innerHTML += `<p><b>Naam: </b> ${color.name}</p>`;
+                        row.innerHTML += `<p><b>Hexidecimale code: </b> ${color.hex}</p>`;
+                        row.innerHTML += `<p><b>RGB code: </b> rgb(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})</p>`;
+                        row.innerHTML += `<p><b>HSL code: </b> hsl(${color.hsl.h}, ${color.hsl.s}, ${color.hsl.l})</p>`;
+                        result.appendChild(row);
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    result.innerHTML = `<b>Error:</b> ${error}`;
+                });
+        }
+    </script>
+    <div>
+        <h1>Kleur naam</h1>
+        <div id="input">
+            <input type="text" id="color-input" placeholder="Hexidecimale kleurcode">
+            <button onclick="getColorName()">Invoeren</button>
+        </div>
+        <div>
+            <h2>Kleur informatie</h2>
+            <div id="result">
+                <i>Nog geen informatie beschikbaar.</i>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
