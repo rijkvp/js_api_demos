@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="default.css">
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <title>Kleur namen</title>
 </head>
 
@@ -40,19 +40,19 @@
                 });
         }
     </script>
-    <div>
-        <h1>Kleur naam</h1>
-        <div id="input">
+    <main class="container">
+        <h1>Kleur namen</h1>
+        <div class="container">
             <input type="text" id="color-input" placeholder="Hexidecimale kleurcode">
             <button onclick="getColorName()">Invoeren</button>
         </div>
-        <div>
+        <div class="containter">
             <h2>Kleur informatie</h2>
             <div id="result">
                 <i>Nog geen informatie beschikbaar.</i>
             </div>
         </div>
-    </div>
+    </main>
 </body>
 
 </html>

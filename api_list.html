@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="default.css">
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <title>API Lijst</title>
 </head>
 
@@ -11,27 +11,24 @@
         fetch('https://api.publicapis.org/entries')
             .then(response => response.json())
             .then(json => {
-                var container = document.getElementById("container");
+                var list = document.getElementById("list");
                 for (entry of json.entries) {
                     if (entry["Auth"] == "") {
-                        var div = document.createElement("div")
-                        div.innerHTML = `
-                            <h2><a href="${entry["Link"]}">${entry["API"]}</a></h2>
-                            <p>${entry["Description"]}</p>
-                        `;
-                        container.appendChild(div);
+                        var listItem = document.createElement("li")
+                        listItem.innerHTML = `<a href="${entry["Link"]}">${entry["API"]}</a>: ${entry["Description"]}`;
+                        list.appendChild(listItem);
                     }
                 }
             });
     </script>
-    <div>
+    <main class="container">
         <h1>Lijst van openbare API's</h1>
         <p>Deze demo-website gebruikt een API om een lijst van openbare API's op te halen. De resultaten zijn gefilterd
             op API's zonder een API token. Voor meer informatie
             zie de <a href="https://github.com/public-apis/public-apis">volledige lijst op GitHub.</a>
         </p>
-        <div id="container"></div>
-    </div>
+        <ul id="list"></ul>
+    </main>
 </body>
 
 </html>

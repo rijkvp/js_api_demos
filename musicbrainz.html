@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <title>Musicbrainz</title>
+</head>
+
+<body>
+    <script>
+        const API_ROOT = "https://musicbrainz.org/ws/2"
+        const LIMIT = 100;
+        function search() {
+            const searchQuery = document.getElementById("search-query").value;
+            const searchResource = document.getElementById("search-resource").value;
+            fetch(API_ROOT + `/${searchResource}?query=${searchQuery}&limit=${LIMIT}&offset=0`, {
+                headers: {
+                    // We willen data ontvangen in JSON ipv XML zodat het makkelijk te verwerken is in JavaScript
+                    "Accept": "application/json",
+                    // MusicBrainz vereist dat je een betekenisvolle User-Agent gebruikt met contact informatie
+                    "User-Agent": "js_api_demos/0.1.0 ( https://github.com/rijkvp/js_api_demos )"
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw Error(`De API gaf een foutmelding! status: ${response.status}`);
+                    }
+                })
+                .then(json => {
+                    var stats = document.getElementById("stats");
+                    var result = document.getElementById("result");
+                    stats.innerHTML = `Eerste ${LIMIT} van de ${json.count}`;
+                    result.innerHTML = '';
+                    switch (searchResource) {
+                        case "release":
+                            displayReleases(result, json);
+                            break;
+                        case "artist":
+                            displayArtists(result, json);
+                            break;
+                        case "recording":
+                            displayRecordings(result, json);
+                            break;
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    result.innerHTML = `<b>Error:</b> ${error}`;
+                });
+        }
+
+        function displayReleases(result, json) {
+            var headers = document.createElement('thead');
+            headers.innerHTML = '<tr><th>Titel</th><th>Artiest(en)</th><th>Datum</th><th>Score</th></tr>'
+            result.appendChild(headers);
+            for (release of json.releases) {
+                var row = document.createElement("tr");
+                row.innerHTML += `<td>${release.title}</td>`;
+                var artistsCell = document.createElement("td");
+                for (artist of release["artist-credit"]) {
+                    artistsCell.innerHTML += `<span>${artist.name}</span>`;
+                }
+                row.appendChild(artistsCell);
+                row.innerHTML += `<td>${release.date ?? "-"}</td>`;
+                row.innerHTML += `<td>${release.score}</td>`;
+                result.appendChild(row);
+            }
+        }
+
+        function displayArtists(result, json) {
+            var headers = document.createElement('thead');
+            headers.innerHTML = '<tr><th>Naam</th><th>Disambiguatie</th><th>Type</th><th>Land</th><th>Score</th></tr>'
+            result.appendChild(headers);
+            for (artist of json.artists) {
+                var row = document.createElement("tr");
+                row.innerHTML += `<td>${artist.name}</td>`;
+                row.innerHTML += `<td>${artist.disambiguation ?? "-"}</td>`;
+                row.innerHTML += `<td>${artist.type ?? "-"}</td>`;
+                row.innerHTML += `<td>${artist.country ?? "-"}</td>`;
+                row.innerHTML += `<td>${artist.score}</td>`;
+                result.appendChild(row);
+            }
+        }
+
+        function displayRecordings(result, json) {
+            var headers = document.createElement('thead');
+            headers.innerHTML = '<tr><th>Titel</th><th>Artiest</th><th>Eerste release datum</th><th>Score</th></tr>'
+            result.appendChild(headers);
+            for (recording of json.recordings) {
+                var row = document.createElement("tr");
+                row.innerHTML += `<td>${recording.title}</td>`;
+                var artistsCell = document.createElement("td");
+                for (artist of recording["artist-credit"]) {
+                    artistsCell.innerHTML += `<span>${artist.name}</span>`;
+                }
+                row.appendChild(artistsCell);
+                row.innerHTML += `<td>${recording["first-release-date"] ?? "-"}</td>`;
+                row.innerHTML += `<td>${recording.score}</td>`;
+                result.appendChild(row);
+            }
+        }
+    </script>
+    <main class="container">
+        <hgroup>
+            <h1>MusicBrainz</h1>
+            <h2>Doorzoek de <a href="">MusicBrainz database</a></h2>
+        </hgroup>
+
+        <div>
+            <label for="search-query">
+                Zoekterm
+                <input type="text" id="search-query" name="search-query" placeholder="Voer een zoekterm in..">
+            </label>
+            <!-- Zie de documentatie: https://musicbrainz.org/doc/MusicBrainz_API voor de beschikbare API bronnen -->
+            <label for="search-resource">
+                Zoekbron
+                <select id="search-resource" name="search-resource">
+                    <option value="release">Release</option>
+                    <option value="artist">Artiest</option>
+                    <option value="recording">Opname</option>
+                </select>
+            </label>
+            <button onclick="search()">Zoeken</button>
+        </div>
+        <div>
+            <hgroup>
+                <h2>Resultaten</h2>
+                <h3 id="stats">Nog geen resultaten</h3>
+            </hgroup>
+            <table id="result">
+            </table>
+        </div>
+    </main>
+
+</body>
+
+</html>
